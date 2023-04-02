@@ -85,7 +85,6 @@ passport.use(
       const isValidPassword = (user, password) => {
         return bcrypt.compareSync(password, user.password);
       };
-      //CONEXION A MONGODB
       MongoDB_Connect()
       try {
         const user = await model.findOne({ email: email });
@@ -160,6 +159,8 @@ app.post("/register", (req, res) => {
   logger.info(
     `Se ha recibido una petición ${req.method} en la ruta ${req.originalUrl}`
   );
+
+  MongoDB_Connect()
 
   const { name, email, password } = req.body;
 
