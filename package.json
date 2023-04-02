@@ -5,7 +5,6 @@
     "description": "",
     "main": "server.js",
     "scripts": {
-        "build": "echo 'Holaa mundo'",
         "start": "node server.js",
         "profiling": "0x -o server.js",
         "test": "node tests/benchmark.js"
