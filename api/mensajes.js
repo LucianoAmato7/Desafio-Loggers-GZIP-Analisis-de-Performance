@@ -6,8 +6,6 @@ dotenv.config();
 
 const urlMongoDB = process.env.URLMONGODB
 
-mongoose.set("strictQuery", false);
-
 const model = mongoose.model("messages", MsjSchema);
 
 class ApiMsjMongoDB {
@@ -17,30 +15,15 @@ class ApiMsjMongoDB {
   }
 
   async ListarMsjs() {
-    try{
-      await mongoose.connect(this.route, {
-        serverSelectionTimeoutMS: 5000,
-      });
       try{
         let msjs = await this.model.find({})
         return msjs
       }catch(error){
         logger.error(`Error en la API de mensajes: ${error}`);
       }
-    }catch(error){
-      logger.error(`Error de la DB en la API de mensajes: ${error}`);
-    }finally{
-      mongoose.disconnect().catch((err) => {
-        throw new Error("error al desconectar la base de datos");
-      });
-    }
   }
 
   async guardarMsj(data) {
-    try{
-      await mongoose.connect(this.route, {
-        serverSelectionTimeoutMS: 5000,
-      });
       try{
         const newMsj = new this.model(data);
         await newMsj.save();
@@ -48,13 +31,6 @@ class ApiMsjMongoDB {
       }catch(error){
         logger.error(`Error en la API de mensajes: ${error}`);
       }
-    }catch(error){
-      logger.error(`Error de la DB en la API de mensajes: ${error}`);
-    }finally{
-      mongoose.disconnect().catch((err) => {
-        throw new Error("error al desconectar la base de datos");
-      });
-    }
   }
 }
 

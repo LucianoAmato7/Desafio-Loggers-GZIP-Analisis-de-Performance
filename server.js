@@ -17,19 +17,17 @@ import { fork } from "child_process";
 import os from "os";
 import cluster from "cluster";
 import dotenv from "dotenv";
+import { MongoDB_Connect, MongoDB_Disconnect, UserSchema } from './DB/config.js'
 import compression from "compression";
 import { logger } from "./logger/winston.js";
-import { UserSchema } from "./DB/config.js"
 
 const gzipMiddleware = compression();
-
-dotenv.config();
-
 const numCPUs = os.cpus().length;
 
-const args = minimist(process.argv.slice(2), []);
-
+dotenv.config();
 const urlMongoDB = process.env.URLMONGODB;
+
+const args = minimist(process.argv.slice(2), []);
 
 const app = express();
 const server = createServer(app);
@@ -87,31 +85,19 @@ passport.use(
       const isValidPassword = (user, password) => {
         return bcrypt.compareSync(password, user.password);
       };
-
+      //CONEXION A MONGODB
+      MongoDB_Connect()
       try {
-        await mongoose.connect(urlMongoDB, {
-          serverSelectionTimeoutMS: 10000,
-        });
-        try {
-          const user = await model.findOne({ email: email });
-          if (!user) {
-            return done(null, false);
-          }
-          if (!isValidPassword(user, password)) {
-            return done(null, false);
-          }
-          return done(null, user);
-        } catch (err) {
-          return done(err);
+        const user = await model.findOne({ email: email });
+        if (!user) {
+          return done(null, false);
         }
+        if (!isValidPassword(user, password)) {
+          return done(null, false);
+        }
+        return done(null, user);
       } catch (err) {
-        console.log(
-          `Error al conectar la base de datos en la strategy 'Login': ${err}`
-        );
-      } finally {
-        mongoose.disconnect().catch((err) => {
-          throw new Error("error al desconectar la base de datos");
-        });
+        return done(err);
       }
     }
   )
@@ -122,25 +108,12 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser(async (id, done) => {
-  try {
-    await mongoose.connect(urlMongoDB, {
-      serverSelectionTimeoutMS: 10000,
-    });
     try {
       const user = await model.findById(id);
       done(null, user);
     } catch (err) {
       done(err);
     }
-  } catch (err) {
-    console.log(
-      `Error al conectar la base de datos en el "deserializeUser": ${err}`
-    );
-  } finally {
-    mongoose.disconnect().catch((err) => {
-      throw new Error("error al desconectar la base de datos");
-    });
-  }
 });
 
 function checkAuthentication(req, res, next) {
@@ -156,6 +129,7 @@ app.get("/login", (req, res) => {
   logger.info(
     `Se ha recibido una petición ${req.method} en la ruta ${req.originalUrl}`
   );
+
   res.render("login");
 });
 
@@ -192,10 +166,6 @@ app.post("/register", (req, res) => {
   const user = { username: name, email: email, password: password };
 
   async function RegisterUser(password) {
-    try {
-      await mongoose.connect(urlMongoDB, {
-        serverSelectionTimeoutMS: 10000,
-      });
       try {
         let users = await model.find({});
         if (users.some((u) => u.email == user.email)) {
@@ -213,15 +183,6 @@ app.post("/register", (req, res) => {
           `Error en la query de la base de datos, en funcion RegisterUser: ${error}`
         );
       }
-    } catch (err) {
-      console.log(
-        `Error al conectar la base de datos en el "deserializeUser": ${err}`
-      );
-    } finally {
-      mongoose.disconnect().catch((err) => {
-        throw new Error("error al desconectar la base de datos");
-      });
-    }
   }
 
   //ENCRIPTO LA CONTRASEÑA
@@ -321,6 +282,9 @@ app.post("/logout", checkAuthentication, (req, res) => {
       res.render("logout", { email });
     }
   });
+
+  //SE DESCONECTA LA BASE DE DATOS
+  MongoDB_Disconnect()
 });
 
 //MOCK - FAKE PRODS
