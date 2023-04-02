@@ -1,10 +1,11 @@
 {
     "type": "module",
-    "name": "DesafioClase32",
+    "name": "DesafioClase34",
     "version": "1.0.0",
     "description": "",
     "main": "server.js",
     "scripts": {
+        "build": "echo 'Holaa mundo'",
         "start": "node server.js",
         "profiling": "0x -o server.js",
         "test": "node tests/benchmark.js"

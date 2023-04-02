@@ -2,33 +2,13 @@ import { faker } from "@faker-js/faker";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { logger } from "../logger/winston.js";
+import { ProdsSchema } from "../DB/config.js"
 faker.locale = "es";
 dotenv.config();
 
 const urlMongoDB = process.env.URLMONGODB;
 
 mongoose.set("strictQuery", false);
-
-const ProdsSchema = new mongoose.Schema(
-  {
-    title: {
-      type: String,
-      unique: true,
-    },
-    price: String,
-    thumbnail: String,
-    timestamp: String,
-    code: {
-      type: String,
-      unique: true,
-    },
-    stock: String,
-    brand: String,
-  },
-  {
-    versionKey: false,
-  }
-);
 
 const model = mongoose.model("products", ProdsSchema);
 

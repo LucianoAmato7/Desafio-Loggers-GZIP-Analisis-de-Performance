@@ -19,6 +19,7 @@ import cluster from "cluster";
 import dotenv from "dotenv";
 import compression from "compression";
 import { logger } from "./logger/winston.js";
+import { UserSchema } from "./DB/config.js"
 
 const gzipMiddleware = compression();
 
@@ -39,22 +40,6 @@ const apiMsjMongoDB = new ApiMsjMongoDB();
 
 //--CONFIGURACION DE MONDODB PARA USUARIOS
 mongoose.set("strictQuery", false);
-const UserSchema = new mongoose.Schema(
-  {
-    username: String,
-    email: {
-      type: String,
-      unique: true,
-    },
-    password: {
-      type: String,
-      unique: true,
-    },
-  },
-  {
-    versionKey: false,
-  }
-);
 
 const model = mongoose.model("users", UserSchema);
 
@@ -364,8 +349,6 @@ app.get("/info", gzipMiddleware, (req, res) => {
     folder: path.dirname(new URL(import.meta.url).pathname),
     numCPUs: numCPUs,
   };
-
-  console.log(info);
 
   res.render("info", { info });
 });

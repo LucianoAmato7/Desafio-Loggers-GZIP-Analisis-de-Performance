@@ -1,22 +1,12 @@
 import mongoose from "mongoose";
 import dotenv from 'dotenv';
+import { MsjSchema } from "../DB/config.js"
 import { logger } from "../logger/winston.js";
 dotenv.config();
 
 const urlMongoDB = process.env.URLMONGODB
 
 mongoose.set("strictQuery", false);
-
-const MsjSchema = new mongoose.Schema(
-  {
-    author: Object,
-    fyh: String,
-    text: String
-  },
-  {
-    versionKey: false,
-  }
-);
 
 const model = mongoose.model("messages", MsjSchema);
 
